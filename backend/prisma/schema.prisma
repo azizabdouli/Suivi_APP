@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Assure {
+  id        Int       @id @default(autoincrement())
+  code      String?
+  nom       String
+  contact   String?
+  contrats Contrat[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Compagnie {
+  id       Int       @id @default(autoincrement())
+  nom      String    @unique
+  isReference Boolean @default(false)
+  contrats Contrat[]
+}
+
+model NatureRisque {
+  id       Int        @id @default(autoincrement())
+  libelle  String     @unique
+  isReference Boolean @default(false)
+  contrats Contrat[]
+}
+
+model NatureAvenant {
+  id        Int        @id @default(autoincrement())
+  libelle   String     @unique
+  documents Document[]
+}
+
+model Etape {
+  id        Int        @id
+  code      Int        @unique
+  libelle   String
+  couleur   String
+  documents Document[]
+}
+
+model Contrat {
+  id          Int        @id @default(autoincrement())
+  assureId    Int
+  compagnieId Int
+  natureRisqueId Int?
+  police      String?
+  nature      String
+  lieu        String?
+  assure      Assure     @relation(fields: [assureId], references: [id])
+  compagnie   Compagnie  @relation(fields: [compagnieId], references: [id])
+  natureRisque NatureRisque? @relation(fields: [natureRisqueId], references: [id])
+  documents   Document[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Document {
+  id        Int       @id @default(autoincrement())
+  contratId Int
+  isReference Boolean @default(false)
+  etapeId   Int
+  natureAvenantId Int?
+  type      String
+  nature    String
+  numero    String?
+  dateEffet DateTime?
+  dateEtape DateTime?
+  remarque  String?
+  contrat   Contrat   @relation(fields: [contratId], references: [id])
+  etape     Etape     @relation(fields: [etapeId], references: [id])
+  natureAvenant NatureAvenant? @relation(fields: [natureAvenantId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
